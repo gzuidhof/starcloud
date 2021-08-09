@@ -18,6 +18,7 @@ func AddCommonCDNHeadersMiddleware(ctx *fiber.Ctx) error {
 	
 	ctx.Set("Cross-Origin-Embedder-Policy", "require-corp")
 	ctx.Set("Cross-Origin-Opener-Policy", "same-origin")
+	ctx.Set("Cross-Origin-Resource-Policy", "cross-origin")
 
 	return err
 }
