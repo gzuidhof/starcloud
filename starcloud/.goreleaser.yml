@@ -1,0 +1,17 @@
+before:
+  hooks:
+    - go generate ./...
+builds:
+  - binary: starcloud
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+     - -s -w -X github.com/gzuidhof/starcloud/starcloud/cmd.Version={{.Version}} -X github.com/gzuidhof/starcloud/starcloud/cmd.Commit={{.Commit}} -X github.com/gzuidhof/starcloud/starcloud/cmd.Date={{.CommitDate}} -X github.com/gzuidhof/starcloud/starcloud/cmd.Target={{.Env.GOOS}}
+archives:
+- files:
+  - none*
