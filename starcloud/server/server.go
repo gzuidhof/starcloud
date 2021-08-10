@@ -44,12 +44,13 @@ func CreateCDNApp() (*fiber.App, error) {
 	}
 
 	// Seed some versions
-	_, err = npm.DownloadPackageIntoFolder("starboard-notebook", "0.13.1", cacheFolderPath)
+	_, err = npm.DownloadPackageIntoFolder("starboard-notebook", "0.13.2", cacheFolderPath)
 	if err != nil {
 		log.Fatalf("Could not download seed starboard-notebook: %v", err)
 	}
 
-	cacheFs := afero.NewCacheOnReadFs(fs, afero.NewMemMapFs(), time.Minute * 60)
+	cacheFs := afero.NewCacheOnReadFs(fs, afero.NewMemMapFs(), time.Minute * 2)
+	
 	npmcdn := npmcdn.NewNPMCDNHandler("/npm/", afero.NewHttpFs(cacheFs))
 
 

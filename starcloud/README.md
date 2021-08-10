@@ -2,4 +2,4 @@
 
 CDN for Starboard assets.
 
-Current version only servers `starboard-notebook@0.13.1`.
+Current version only servers `starboard-notebook@0.13.2`.
