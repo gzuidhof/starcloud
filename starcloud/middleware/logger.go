@@ -9,7 +9,11 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-func NewLoggerMiddleware(name string, fields ...zapcore.Field) fiber.Handler {
+type LoggerMiddlewareConfig struct {
+	LogSuccesfulRequests bool
+}
+
+func NewLoggerMiddleware(name string, cfg LoggerMiddlewareConfig, fields ...zapcore.Field) fiber.Handler {
 	var errHandler fiber.ErrorHandler
 	var zaplogger = zap.L()
 	var once sync.Once
@@ -36,33 +40,45 @@ func NewLoggerMiddleware(name string, fields ...zapcore.Field) fiber.Handler {
 
 		// Handle request, store err for logging
 		chainErr := c.Next()
+
 		// Manually call error handler
 		if chainErr != nil {
 			once.Do(func() {
 				// override error handler
 				errHandler = c.App().Config().ErrorHandler
 			})
-				
 
-			if err := errHandler(c, chainErr); err != nil {
-				_ = c.SendStatus(fiber.StatusInternalServerError)
+			if errHandler != nil { // I'm not sure if this `if` condition is necessary - but let's be defensive.
+				if err := errHandler(c, chainErr); err != nil {
+					_ = c.SendStatus(fiber.StatusInternalServerError)
+				}
 			}
 		}
 		// The callsite is useless for the logger field here
 		middlewareLogger := logctx.WithOptions(zap.WithCaller(false))
 
-		stop := time.Now()
+		resp := c.Response()
+		if resp == nil { // Should never happen, sanity check.
+			zap.L().Error("Response is nil in logger (would have been panic)")
+			return nil
+		}
+
+		latency := time.Since(start)
+		status := resp.StatusCode()
 		if chainErr != nil {
 			middlewareLogger.Error(
 				chainErr.Error(),
-				zap.Int("status", c.Response().StatusCode()),
-				zap.Duration("latency", stop.Sub(start)),
+				zap.Int("status", status),
+				zap.Duration("latency", latency),
 			)
 		} else {
+			if !cfg.LogSuccesfulRequests && (status == 200 || status == 201 || status == 204 || status == 400 || status == 401 || status == 403 || status == 404) {
+				return nil
+			}
 			middlewareLogger.Info(
 				"",
-				zap.Int("status", c.Response().StatusCode()),
-				zap.Duration("latency", stop.Sub(start)),
+				zap.Int("status", status),
+				zap.Duration("latency", latency),
 			)
 		}
 		return nil

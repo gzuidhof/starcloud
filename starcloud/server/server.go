@@ -21,10 +21,9 @@ import (
 	"go.uber.org/zap"
 )
 
-
 func CreateCDNApp() (*fiber.App, error) {
 	app := fiber.New(fiber.Config{
-		CaseSensitive: true,
+		CaseSensitive:         true,
 		DisableStartupMessage: true,
 	})
 
@@ -32,7 +31,7 @@ func CreateCDNApp() (*fiber.App, error) {
 	app.Use(requestid.New(requestid.Config{
 		ContextKey: "request_id",
 	}))
-	app.Use(middleware.NewLoggerMiddleware("starcloud"))
+	app.Use(middleware.NewLoggerMiddleware("starcloud", middleware.LoggerMiddlewareConfig{LogSuccesfulRequests: true}))
 	app.Use(etag.New())
 
 	cacheFolderPath := viper.GetString("cache_folder")
@@ -49,20 +48,17 @@ func CreateCDNApp() (*fiber.App, error) {
 		log.Fatalf("Could not download seed starboard-notebook: %v", err)
 	}
 
-	cacheFs := afero.NewCacheOnReadFs(fs, afero.NewMemMapFs(), time.Minute * 2)
-	
+	cacheFs := afero.NewCacheOnReadFs(fs, afero.NewMemMapFs(), time.Minute*2)
+
 	npmcdn := npmcdn.NewNPMCDNHandler("/npm/", afero.NewHttpFs(cacheFs))
 
-
-	app.Get("/npm", func (ctx *fiber.Ctx) error {
+	app.Get("/npm", func(ctx *fiber.Ctx) error {
 		return ctx.SendString(`Hello there 🙋‍♂️, this small CDN only serves recent starboard-notebook versions with the correct headers.`)
 	})
 
 	app.Get("/npm/*", middleware.AddCommonCDNHeadersMiddleware, npmcdn.Handler)
 	app.Head("/npm/*", middleware.AddCommonCDNHeadersMiddleware, npmcdn.Handler)
 	app.Options("/npm/*", middleware.AddCommonCDNHeadersMiddleware)
-
-	
 
 	return app, nil
 }

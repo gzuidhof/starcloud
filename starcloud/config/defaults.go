@@ -9,4 +9,9 @@ import (
 
 func setDefaults() {
 	viper.SetDefault("port", 8080)
+
+	viper.SetDefault("system.name", "ES Land")
+	viper.SetDefault("system.url", "https://es.land")
+
+	viper.SetDefault("email.system_from", "ES Land <system@es.land>")
 }

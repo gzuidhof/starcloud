@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="{{isset(lang) ? lang : " en"}}" class="no-js">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <title>{{ isset(title) ? title : "ES.land" }}</title>
+
+  <meta name="themeColor" content={{ isset(themeColor) ? themeColor : "#5e5ef8" }}>
+
+  <script>
+    document.documentElement.classList.replace("no-js", "js")
+  </script>
+
+  <link rel="stylesheet" href="/static/styles/app.css">
+  <link rel="icon" href="/static/images/favicon-32x32.png">
+
+  <link rel="preload" href="/static/fonts/inter.var.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/static/fonts/bootstrap-icons.woff2" as="font" type="font/woff2" crossorigin>
+
+  {{block head()}}{{end}}
+</head>
+
+<body>
+  {{yield documentBody()}}
+
+  <script src="/static/js/app.js" async defer></script>
+  {{block bodyEnd()}}{{end}}
+</body>
+
+</html>
