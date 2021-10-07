@@ -21,10 +21,9 @@ import (
 	"go.uber.org/zap"
 )
 
-
 func CreateCDNApp() (*fiber.App, error) {
 	app := fiber.New(fiber.Config{
-		CaseSensitive: true,
+		CaseSensitive:         true,
 		DisableStartupMessage: true,
 	})
 
@@ -46,23 +45,30 @@ func CreateCDNApp() (*fiber.App, error) {
 	// Seed some versions
 	_, err = npm.DownloadPackageIntoFolder("starboard-notebook", "0.13.2", cacheFolderPath)
 	if err != nil {
-		log.Fatalf("Could not download seed starboard-notebook: %v", err)
+		log.Fatalf("Could not download seed starboard-notebook@0.13.2: %v", err)
 	}
 
-	cacheFs := afero.NewCacheOnReadFs(fs, afero.NewMemMapFs(), time.Minute * 2)
-	
+	_, err = npm.DownloadPackageIntoFolder("starboard-notebook", "0.14.0", cacheFolderPath)
+	if err != nil {
+		log.Fatalf("Could not download seed starboard-notebook@0.14.0: %v", err)
+	}
+
+	_, err = npm.DownloadPackageIntoFolder("starboard-notebook", "0.14.1", cacheFolderPath)
+	if err != nil {
+		log.Fatalf("Could not download seed starboard-notebook@0.14.1: %v", err)
+	}
+
+	cacheFs := afero.NewCacheOnReadFs(fs, afero.NewMemMapFs(), time.Minute*2)
+
 	npmcdn := npmcdn.NewNPMCDNHandler("/npm/", afero.NewHttpFs(cacheFs))
 
-
-	app.Get("/npm", func (ctx *fiber.Ctx) error {
+	app.Get("/npm", func(ctx *fiber.Ctx) error {
 		return ctx.SendString(`Hello there 🙋‍♂️, this small CDN only serves recent starboard-notebook versions with the correct headers.`)
 	})
 
 	app.Get("/npm/*", middleware.AddCommonCDNHeadersMiddleware, npmcdn.Handler)
 	app.Head("/npm/*", middleware.AddCommonCDNHeadersMiddleware, npmcdn.Handler)
 	app.Options("/npm/*", middleware.AddCommonCDNHeadersMiddleware)
-
-	
 
 	return app, nil
 }
