@@ -2,7 +2,7 @@
 
 CDN for Starboard assets.
 
-Current version only serves `starboard-notebook@0.13.2`, `starboard-notebook@0.14.0`, `starboard-notebook@0.14.1`.
+Current version only serves `starboard-notebook@0.13.2`, `starboard-notebook@0.14.0`, `starboard-notebook@0.14.1`, `starboard-notebook@0.14.2`.
 
 ## Deploying
 

@@ -58,6 +58,11 @@ func CreateCDNApp() (*fiber.App, error) {
 		log.Fatalf("Could not download seed starboard-notebook@0.14.1: %v", err)
 	}
 
+	_, err = npm.DownloadPackageIntoFolder("starboard-notebook", "0.14.2", cacheFolderPath)
+	if err != nil {
+		log.Fatalf("Could not download seed starboard-notebook@0.14.2: %v", err)
+	}
+
 	cacheFs := afero.NewCacheOnReadFs(fs, afero.NewMemMapFs(), time.Minute*2)
 
 	npmcdn := npmcdn.NewNPMCDNHandler("/npm/", afero.NewHttpFs(cacheFs))
